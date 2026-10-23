@@ -132,3 +132,80 @@ added, please contact the authors before redistributing or reusing the data.
 
 Questions, corrections, and requests for additional information may be
 submitted through the repository's GitHub Issues page.
+
+## Complete Git LFS download guide
+
+All `.nii` files in this repository are stored with Git LFS. If Git LFS is not
+installed or enabled when the repository is cloned, the working copy may
+contain small text pointer files instead of the actual image data. Downloading
+a GitHub ZIP archive can have the same problem, so use a Git clone and verify
+the LFS checkout as described below.
+
+### 1. Install and enable Git LFS
+
+Install Git LFS once on your computer. On Windows, the command is:
+
+```powershell
+winget install --id GitHub.GitLFS -e
+```
+
+Then enable the Git LFS filters and confirm the installation:
+
+```bash
+git lfs install
+git lfs version
+```
+
+### 2. Clone a new copy
+
+Enable Git LFS before cloning so that the large files are downloaded during
+checkout:
+
+```bash
+git lfs install
+git clone https://github.com/Rose-0616/cynomolgus-lifespan-pet-mri-atlas.git
+cd cynomolgus-lifespan-pet-mri-atlas
+git lfs pull origin
+```
+
+### 3. Repair an existing clone
+
+If the repository was already cloned and the `.nii` files are pointers, run:
+
+```bash
+git lfs install --local
+git lfs fetch --all origin
+git lfs pull origin
+git lfs checkout
+```
+
+`git lfs fetch --all origin` downloads LFS objects referenced by every branch
+and tag. `git lfs pull origin` downloads the objects for the current checkout,
+and `git lfs checkout` writes the downloaded content into the working tree.
+
+### 4. Verify the download
+
+List the LFS files together with their expected sizes:
+
+```bash
+git lfs ls-files --size
+```
+
+Run the LFS integrity check:
+
+```bash
+git lfs fsck
+```
+
+A pointer file starts with text similar to the following:
+
+```text
+version https://git-lfs.github.com/spec/v1
+oid sha256:...
+size ...
+```
+
+If a `.nii` file has this content, repeat the repair commands in section 3. If
+Git LFS reports an authentication, network, or storage-quota error, those
+problems must be resolved before the real file can be downloaded; replacing a
+ZIP archive or copying the pointer text will not restore the image data.
